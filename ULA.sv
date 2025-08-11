@@ -74,15 +74,38 @@ task automatic decremento(
 	c_out = resultado[6];			// 1 = sem borrow, 0 = borrow
 endtask
 
+//função and(A, B, 
+
 always_comb begin
 	//Valores padrão
 	O = 6'bXXXXXX;
 	CarryOver = 1'b0;
 	zero = 1'b0;
 	
-	//Operações lógicas
-	if (S[3]) begin
+	//Caso reset esteja ativado
+	if (R) begin
 		O = 6'b000000;
+		CarryOver = 1'b0;
+		zero = 1'b0;
+   end
+	
+	//Operações lógicas
+	else if (S[3]) begin
+		case ({S[2], S[1], S[0]})
+			3'b000: O = A & B; 	//porta AND
+			3'b001: O = ~A; 		//porta NOTA
+			3'b010: O = ~B;		//porta NOTB
+			3'b011: O = A | B; 	//porta OR
+			3'b100: O = A ^ B; 	//porta XOR
+			3'b101: O = ~(A & B);//porta NAND
+			3'b110: O = A;			//Sai A
+			3'b111: O = B;			//Sai B
+			default:	O = 6'b000000;
+		endcase
+		
+		if (O == 0) begin
+			zero = 1'b1;
+		end
 	end
 	
 	//Operações aritmétricas
